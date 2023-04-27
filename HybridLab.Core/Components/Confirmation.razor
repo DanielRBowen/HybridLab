@@ -1,0 +1,26 @@
+<SlideUpDown Active="@Active">
+    <div class="confirmation-message">@Message</div>
+    <div class="btn-group">
+        <button class="btn btn-success" @onclick="() => OnConfirmationResult(YesRoute)">Yes</button>
+        <button class="btn btn-danger" @onclick="() => OnConfirmationResult(string.Empty)">No</button>
+    </div>
+</SlideUpDown>
+
+@code {
+    [Parameter]
+    public bool Active { get; set; }
+
+    [Parameter]
+    public string Message { get; set; } = "Are you sure?";
+
+    [Parameter]
+    public string YesRoute { get; set; } = "YesRoute";
+
+    [Parameter]
+    public EventCallback<string> ConfirmationResult { get; set; }
+
+    private async Task OnConfirmationResult(string route)
+    {
+        await ConfirmationResult.InvokeAsync(route);
+    }
+}

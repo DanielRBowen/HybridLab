@@ -1,0 +1,11 @@
+<div class="slide-down-toggle @(Active ? "slide-down-animation" : "slide-up-animation")" style="@(Active ? "display: block;" : "display: none;")">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public bool Active { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}

@@ -1,0 +1,82 @@
+﻿<div id="@Id" class="btn-group">
+    <button type="button" @onclick="DecrementValue" class="btn btn-secondary"><span class="arrow arrow-left mx-3 "></span></button>
+    <input type="number" @bind-value="SelectedNumber" />
+    <button type="button" @onclick="IncrementValue" class="btn btn-secondary"><span class="arrow arrow-right mx-3"></span></button>
+</div>
+
+
+@code {
+    [Parameter]
+    public int Min { get; set; } = 1;
+
+    [Parameter]
+    public int Max { get; set; } = 9;
+
+    [Parameter]
+    public bool Inline { get; set; } = false;
+
+    [Parameter]
+    public string Id { get; set; } = "";
+
+    private int _selectedNumber = 1;
+
+    [Parameter]
+    public int SelectedNumber
+    {
+        get
+        {
+            return _selectedNumber;
+        }
+        set
+        {
+            if (value != _selectedNumber)
+            {
+                if (value < Min)
+                {
+                    _selectedNumber = Min;
+                }
+
+                if (value > Max)
+                {
+                    _selectedNumber = Max;
+                }
+
+                if (value < 0)
+                {
+                    _selectedNumber = int.Abs(value);
+                }
+
+                if (value < Min == false && value > Max == false)
+                {
+                    _selectedNumber = value;
+                }
+
+                InvokeAsync(async () => await SelectedNumberChanged.InvokeAsync(SelectedNumber));
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<int> SelectedNumberChanged { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+    private void DecrementValue()
+    {
+        if (SelectedNumber > 0 && SelectedNumber > Min)
+        {
+            SelectedNumber--;
+        }
+    }
+
+    private void IncrementValue()
+    {
+        if (SelectedNumber < Max)
+        {
+            SelectedNumber++;
+        }
+    }
+}

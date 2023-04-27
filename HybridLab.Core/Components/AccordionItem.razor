@@ -1,0 +1,36 @@
+<div class="accordion-item" @attributes="Attributes">
+    <div class="accordion-item-header" @onclick="Toggle">
+        @Header
+    </div>
+    <div class="accordion-item-content @GetContentClass()" style="@GetContentStyle()">
+        @Content
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment Header { get; set; }
+
+    [Parameter]
+    public RenderFragment Content { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> Attributes { get; set; }
+
+    private bool expanded = false;
+
+    private string GetContentClass()
+    {
+        return expanded ? "expanded" : "collapsed";
+    }
+
+    private string GetContentStyle()
+    {
+        return expanded ? "" : "display:none";
+    }
+
+    private void Toggle()
+    {
+        expanded = !expanded;
+    }
+}

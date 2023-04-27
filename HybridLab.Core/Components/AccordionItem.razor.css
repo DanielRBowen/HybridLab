@@ -1,0 +1,28 @@
+﻿.accordion-item {
+    border-bottom: 1px solid #ccc;
+}
+
+.accordion-item-header {
+    cursor: pointer;
+}
+
+    .accordion-item-header h2 {
+        margin: 0;
+    }
+
+.accordion-item-content {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.5s ease-out, transform 0.5s ease-out;
+}
+
+    .accordion-item-content.collapsed {
+        max-height: 0;
+        transform: translateY(-10px);
+    }
+
+    .accordion-item-content.expanded {
+        max-height: 3000px;
+        transform: translateY(0);
+        overflow-y: auto
+    }

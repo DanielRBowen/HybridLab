@@ -1,0 +1,201 @@
+﻿<div class="card bg-light mt-3 my-2" style="width:18rem">
+    <div class="card-body">
+        <h3 class="card-title">Time Picker Component</h3>
+        <select @bind="SelectedTime" class="@SelectClass">
+            @foreach (var time in _times)
+            {
+                <option value="@time">@DisplaySelectedTimeString(time)</option>
+            }
+        </select>
+        <p class="card-text">Picker <code>SelectedTime</code>: @DisplaySelectedTimeString(SelectedTime)</p>
+    </div>
+</div>
+
+@code {
+    private TimeSpan _selectedTime;
+
+    [Parameter]
+    public TimeSpan SelectedTime
+    {
+        get
+        {
+            return _selectedTime;
+        }
+        set
+        {
+            if (value != _selectedTime)
+            {
+                _selectedTime = value;
+                Task.Run(() => SelectedTimeChanged.InvokeAsync(SelectedTime));
+            }
+        }
+    }
+
+    [Parameter]
+    public TimeSpan StartTime { get; set; }
+
+    [Parameter]
+    public TimeSpan EndTime { get; set; }
+
+    [Parameter]
+    public string SelectClass { get; set; } = "form-control";
+
+    private List<TimeSpan> _times = new List<TimeSpan>();
+
+    [Parameter]
+    public EventCallback<TimeSpan> SelectedTimeChanged { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        CreateTimes();
+
+        if (EndTime.Hours < StartTime.Hours)
+        {
+            if (SelectedTime.TotalSeconds == 0 ||
+            new TimeSpan(SelectedTime.Hours, Nearest15(SelectedTime.Minutes), 0) < new TimeSpan(StartTime.Hours, Nearest15(StartTime.Minutes), 0) &&
+            new TimeSpan(SelectedTime.Hours, Nearest15(SelectedTime.Minutes), 0) > new TimeSpan(EndTime.Hours, Nearest15(EndTime.Minutes), 0))
+            {
+                SelectedTime = _times.First();
+            }
+            else
+            {
+                SelectedTime = new TimeSpan(SelectedTime.Hours, Nearest15(SelectedTime.Minutes), 0);
+            }
+        }
+        else
+        {
+            if (SelectedTime.TotalSeconds == 0 ||
+            new TimeSpan(SelectedTime.Hours, Nearest15(SelectedTime.Minutes), 0) < new TimeSpan(StartTime.Hours, Nearest15(StartTime.Minutes), 0) ||
+            new TimeSpan(SelectedTime.Hours, Nearest15(SelectedTime.Minutes), 0) > new TimeSpan(EndTime.Hours, Nearest15(EndTime.Minutes), 0))
+            {
+                SelectedTime = _times.First();
+            }
+            else
+            {
+                SelectedTime = new TimeSpan(SelectedTime.Hours, Nearest15(SelectedTime.Minutes), 0);
+            }
+        }
+    }
+
+    private void CreateTimes()
+    {
+        if (EndTime.Hours > 23 || StartTime.Hours > 23)
+        {
+            return;
+        }
+
+        if (EndTime.Hours < StartTime.Hours)
+        {
+            AddTimes(StartTime, new TimeSpan(23, 59, 0));
+            AddTimes(new TimeSpan(0, 0, 0), EndTime);
+        }
+        else
+        {
+            AddTimes(StartTime, EndTime);
+        }
+    }
+
+    private void AddTimes(TimeSpan startTime, TimeSpan endTime)
+    {
+        for (int hour = startTime.Hours; hour <= endTime.Hours; hour++)
+        {
+            if (hour == startTime.Hours)
+            {
+                switch (Nearest15(startTime.Minutes))
+                {
+                    case 0:
+                        _times.Add(new TimeSpan(hour, 0, 0));
+                        _times.Add(new TimeSpan(hour, 15, 0));
+                        _times.Add(new TimeSpan(hour, 30, 0));
+                        _times.Add(new TimeSpan(hour, 45, 0));
+                        break;
+                    case 15:
+                        _times.Add(new TimeSpan(hour, 15, 0));
+                        _times.Add(new TimeSpan(hour, 30, 0));
+                        _times.Add(new TimeSpan(hour, 45, 0));
+                        break;
+                    case 30:
+                        _times.Add(new TimeSpan(hour, 30, 0));
+                        _times.Add(new TimeSpan(hour, 45, 0));
+                        break;
+                    case 45:
+                        _times.Add(new TimeSpan(hour, 45, 0));
+                        break;
+                    default:
+                        continue;
+                }
+            }
+            else if (hour == endTime.Hours)
+            {
+                switch (Nearest15(endTime.Minutes))
+                {
+                    case 15:
+                        _times.Add(new TimeSpan(hour, 0, 0));
+                        _times.Add(new TimeSpan(hour, 15, 0));
+                        break;
+                    case 30:
+                        _times.Add(new TimeSpan(hour, 0, 0));
+                        _times.Add(new TimeSpan(hour, 15, 0));
+                        _times.Add(new TimeSpan(hour, 30, 0));
+                        break;
+                    case 45:
+                        _times.Add(new TimeSpan(hour, 0, 0));
+                        _times.Add(new TimeSpan(hour, 15, 0));
+                        _times.Add(new TimeSpan(hour, 30, 0));
+                        _times.Add(new TimeSpan(hour, 45, 0));
+                        break;
+                    default:
+                        if (hour == 23)
+                        {
+                            _times.Add(new TimeSpan(hour, 0, 0));
+                            _times.Add(new TimeSpan(hour, 15, 0));
+                            _times.Add(new TimeSpan(hour, 30, 0));
+                            _times.Add(new TimeSpan(hour, 45, 0));
+                        }
+                        else
+                        {
+                            _times.Add(new TimeSpan(hour, 0, 0));
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                _times.Add(new TimeSpan(hour, 0, 0));
+                _times.Add(new TimeSpan(hour, 15, 0));
+                _times.Add(new TimeSpan(hour, 30, 0));
+                _times.Add(new TimeSpan(hour, 45, 0));
+            }
+        }
+    }
+
+    private int Nearest15(int number)
+    {
+        if (number == 0)
+        {
+            return 0;
+        }
+        else if (number > 45)
+        {
+            return 0;
+        }
+        else if (number > 30)
+        {
+            return 45;
+        }
+        else if (number > 15)
+        {
+            return 30;
+        }
+        else
+        {
+            return 15;
+        }
+    }
+    public static string DisplaySelectedTimeString(TimeSpan timeSpan)
+    {
+        return new DateTime(2021, 1, 1, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds).ToString("h:mm tt"); // LT
+    }
+}

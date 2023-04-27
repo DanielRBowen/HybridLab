@@ -1,0 +1,68 @@
+/*From ChatGPT*/
+.slide-out {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    overflow: auto;
+    transition: transform 0.3s ease-out;
+    background-color: #ffffff;
+    z-index: 1035; /*The bootstrap nav-bar has a z-index of 1030*/
+    border: 1px solid black;
+    overflow-y: scroll;
+}
+
+.close-slide-out {
+    position: fixed;
+    background-color: rgba(25,25,25,.4);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100vh;
+    width: 100vw;
+    z-index: 1034;
+    /*border: 30px solid black;*/
+}
+
+.slide-out-content {
+    background-color: white;
+    padding: 16px;
+}
+
+.slide-out-right {
+    width: 80vw;
+    max-width: 530px;
+    right: 0;
+    transform: translateX(100%);
+}
+
+.slide-out-left {
+    width: 80vw;
+    max-width: 530px;
+    left: 0;
+    transform: translateX(-100%);
+}
+
+.slide-out-top {
+    height: 80vh;
+    max-height: 530px;
+    top: 0;
+    transform: translateY(-100%);
+}
+
+.slide-out-bottom {
+    height: 80vh;
+    max-height: 530px;
+    bottom: 0;
+    transform: translateY(100%);
+}
+
+.slide-out-visible {
+    transform: translateX(0) translateY(0);
+    display: block;
+}
+
+.do-not-display {
+    display: none;
+}
+

@@ -1,0 +1,51 @@
+﻿@if (!string.IsNullOrWhiteSpace(Source))
+{
+    <figure style="cursor: pointer;">
+        <img src="@Source" alt="…" class="@ThumbnailClass">
+    </figure>
+}
+
+@code {
+    [Parameter]
+    public string Source { get; set; }
+    public string DetailedSource { get; set; }
+    public string Alt { get; set; }
+    [Parameter]
+    public string ThumbnailClass { get; set; }
+    private bool isDetailedDisplayed = false;
+
+    public void OpenDetailed()
+    {
+        return;
+
+        if (string.IsNullOrWhiteSpace(DetailedSource) == false)
+        {
+            isDetailedDisplayed = true;
+        }
+
+        isDetailedDisplayed = false;
+    }
+
+    public void CloseDetailed()
+    {
+        isDetailedDisplayed = false;
+    }
+
+    public void ToggleDetailed()
+    {
+        if (string.IsNullOrWhiteSpace(DetailedSource) == false)
+        {
+            if (isDetailedDisplayed == true)
+            {
+                isDetailedDisplayed = false;
+            }
+            else
+            {
+                isDetailedDisplayed = true;
+            }
+        }
+
+        isDetailedDisplayed = false;
+    }
+
+}

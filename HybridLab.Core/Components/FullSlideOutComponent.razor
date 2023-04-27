@@ -1,0 +1,113 @@
+<!--From ChatGPT-->
+<div class="slide-out @slideClass @directionClass @_displayClass" @attributes="Attributes" style="@SlideOutStyleOverride">
+    <div class="slide-out-content">
+        @ChildContent
+    </div>
+</div>
+<div class="" style="@(IsVisible ? "display: block;" : "display: none;")" @onclick="Hide"></div>
+
+@code {
+    public enum SlideDirection
+    {
+        Right,
+        Left,
+        Top,
+        Bottom
+    }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private bool _isVisible = false;
+
+    private string _displayClass = "";
+
+    [Parameter]
+    public bool IsVisible 
+    {
+        get
+        {
+            return _isVisible;
+        }
+
+        set
+        {
+            if (value != _isVisible)
+            {
+                _isVisible = value;
+                //InvokeAsync(async () => await IsVisibleChanged.InvokeAsync(_isVisible));
+                IsVisibleChanged.InvokeAsync(_isVisible);
+
+
+                if (value == false)
+                {
+                    // To allow the animation to go before display none.
+                    InvokeAsync(async () =>
+                    {
+                        await Task.Delay(200);
+                        _displayClass = "do-not-display";
+                    });
+                }
+                else
+                {
+                    _displayClass = "";
+                }
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<bool> IsVisibleChanged { get; set; }
+
+    [Parameter]
+    public int RelativeZIndex { get; set; } = -2; // So the normal slide out & their buttons can still be on top for the first full slide out.
+
+    [Parameter]
+    public SlideDirection Direction { get; set; } = SlideDirection.Right;
+
+    private string slideClass => IsVisible ? "slide-out-visible" : "";
+
+    private string SlideOutStyleOverride
+    {
+        get
+        {
+            if (RelativeZIndex != 0)
+            {
+                return "z-index: " + (1035 + RelativeZIndex) + ";";
+            }
+
+            return "";
+        }
+    }
+
+    [Parameter]
+    public Dictionary<string, object> Attributes { get; set; }
+
+    private string directionClass => Direction switch
+    {
+        SlideDirection.Left => "slide-out-left",
+        SlideDirection.Top => "slide-out-top",
+        SlideDirection.Bottom => "slide-out-bottom",
+        _ => "slide-out-right"
+    };
+
+    [Parameter]
+    public EventCallback OnClosed { get; set; }
+
+    [Parameter]
+    public EventCallback OnOpened { get; set; }
+
+    public async Task Show()
+    {
+        IsVisible = true;
+        await InvokeAsync(StateHasChanged);
+        await OnOpened.InvokeAsync();
+    }
+
+    public async Task Hide()
+    {
+        IsVisible = false;
+        await InvokeAsync(StateHasChanged);
+        await OnClosed.InvokeAsync();
+    }
+}

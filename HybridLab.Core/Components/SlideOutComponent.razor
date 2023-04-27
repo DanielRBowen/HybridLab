@@ -1,0 +1,56 @@
+<!--From ChatGPT-->
+<div class="slide-out @slideClass @directionClass">
+    <div class="slide-out-content">
+        @ChildContent
+    </div>
+</div>
+<div class="close-slide-out" style="@(IsVisible ? "display: block;" : "display: none;")" @onclick="Hide"></div>
+
+@code {
+    public enum SlideDirection
+    {
+        Right,
+        Left,
+        Top,
+        Bottom
+    }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    [Parameter]
+    public SlideDirection Direction { get; set; } = SlideDirection.Right;
+
+    [Parameter]
+    public EventCallback OnClosed { get; set; }
+
+    [Parameter]
+    public EventCallback OnOpened { get; set; }
+
+    private string slideClass => IsVisible ? "slide-out-visible" : "";
+
+    private string directionClass => Direction switch
+    {
+        SlideDirection.Left => "slide-out-left",
+        SlideDirection.Top => "slide-out-top",
+        SlideDirection.Bottom => "slide-out-bottom",
+        _ => "slide-out-right"
+    };
+
+    public async Task Show()
+    {
+        IsVisible = true;
+        await InvokeAsync(StateHasChanged);
+        await OnOpened.InvokeAsync();
+    }
+
+    public async Task Hide()
+    {
+        IsVisible = false;
+        await InvokeAsync(StateHasChanged);
+        await OnClosed.InvokeAsync();
+    }
+}

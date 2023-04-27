@@ -1,0 +1,29 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+
+@inject NavigationManager Navigation
+@inject IAccountClient AccountClient
+@inject IJSRuntime JSRuntime
+
+<AuthorizeView>
+    <Authorized>
+        Hello,  @context.User.Identity?.Name!
+        <button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button>
+    </Authorized>
+    <NotAuthorized>
+        <a href="account/login">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code{
+    private bool areButtonsDisabled = false;
+
+    private async Task BeginSignOut(MouseEventArgs args)
+    {
+        Navigation.NavigateTo("/");
+        await AccountClient.Logout();
+        Navigation.NavigateTo("/");
+        await JSRuntime.InvokeVoidAsync("reloadClient");
+    }
+}

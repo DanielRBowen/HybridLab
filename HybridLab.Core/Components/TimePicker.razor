@@ -1,0 +1,79 @@
+﻿<InputSelect @attributes="AdditionalAttributes" class="form-control" @bind-Value="@SelectedTime">
+    @foreach (var time in Times)
+    {
+        <option value="@time">@time.ToString("h:mm tt")</option>
+    }
+</InputSelect>
+
+@code {
+    [Parameter]
+    public Dictionary<string, object> AdditionalAttributes { get; set; }
+
+    [Parameter]
+    public TimeSpan? MinimumTimeSelected { get; set; }
+
+    [Parameter]
+    public TimeSpan? MaximumTimeSelected { get; set; }
+
+    private TimeSpan _selectedTime;
+
+    [Parameter]
+    public TimeSpan SelectedTime
+    {
+        get => _selectedTime;
+        set
+        {
+            var roundedTime = RoundToNearest15Minutes(value);
+            var clampedTime = ClampTimeToRange(roundedTime, MinimumTimeSelected, MaximumTimeSelected);
+            _selectedTime = clampedTime;
+            SelectedTimeChanged.InvokeAsync(_selectedTime);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<TimeSpan> SelectedTimeChanged { get; set; }
+
+    private readonly List<TimeSpan> Times = new List<TimeSpan>();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        if (MinimumTimeSelected == null)
+        {
+            MinimumTimeSelected = DateTime.Now.TimeOfDay;
+        }
+
+        var time = TimeSpan.Zero;
+
+        while (time < TimeSpan.FromDays(1))
+        {
+            Times.Add(time);
+            time = time.Add(TimeSpan.FromMinutes(15));
+        }
+    }
+
+    private TimeSpan RoundToNearest15Minutes(TimeSpan time)
+    {
+        var minutes = time.TotalMinutes;
+        var roundedMinutes = Math.Round(minutes / 15, MidpointRounding.AwayFromZero) * 15;
+        return TimeSpan.FromMinutes(roundedMinutes);
+    }
+
+    private TimeSpan ClampTimeToRange(TimeSpan time, TimeSpan? minTime, TimeSpan? maxTime)
+    {
+        var clampedTime = time;
+
+        if (minTime != null && clampedTime < minTime)
+        {
+            clampedTime = minTime.Value;
+        }
+
+        if (maxTime != null && clampedTime > maxTime)
+        {
+            clampedTime = maxTime.Value;
+        }
+
+        return clampedTime;
+    }
+}

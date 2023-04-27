@@ -1,0 +1,37 @@
+@using System.Collections.Generic
+
+<InputSelect @attributes="AdditionalAttributes" class="form-control" @bind-Value="@SelectedProvince">
+    @foreach (var province in Provinces)
+    {
+        <option value="@province">@province</option>
+    }
+</InputSelect>
+
+@code {
+    // Code from ChatGPT
+    [Parameter]
+    public Dictionary<string, object> AdditionalAttributes { get; set; }
+
+    [Parameter]
+    public string SelectedProvince { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SelectedProvinceChanged { get; set; }
+
+    private readonly List<string> Provinces = new List<string>
+    {
+        "Alberta",
+        "British Columbia",
+        "Manitoba",
+        "New Brunswick",
+        "Newfoundland and Labrador",
+        "Northwest Territories",
+        "Nova Scotia",
+        "Nunavut",
+        "Ontario",
+        "Prince Edward Island",
+        "Quebec",
+        "Saskatchewan",
+        "Yukon"
+    };
+}

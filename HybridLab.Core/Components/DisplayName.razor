@@ -1,0 +1,33 @@
+﻿@using System.Reflection
+@using System.Linq.Expressions
+@using System.ComponentModel.DataAnnotations
+@typeparam T
+@if (ChildContent == null)
+{
+    <label @attributes="AdditionalAttributes" class="@Class">@label</label>
+}
+else
+{
+    <label @attributes="AdditionalAttributes" class="@Class">
+        @label
+        @ChildContent
+    </label>
+}
+@code {
+    // https://stackoverflow.com/questions/57202354/how-to-put-the-display-name-in-a-label-on-a-blazor-page
+    [Parameter] public Expression<Func<T>> For { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public string Class { get; set; } = "";
+
+    [Parameter]
+    public Dictionary<string, object> AdditionalAttributes { get; set; }
+
+    private string label => GetDisplayName();
+
+    private string GetDisplayName()
+    {
+        var expression = (MemberExpression)For.Body;
+        var value = expression.Member.GetCustomAttribute(typeof(DisplayAttribute)) as DisplayAttribute;
+        return value?.Name ?? expression.Member.Name ?? "";
+    }
+}

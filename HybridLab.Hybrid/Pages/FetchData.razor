@@ -1,0 +1,33 @@
+﻿@page "/fetchdata"
+
+@attribute [Authorize(Roles = "admin")]
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+<AuthorizeView>
+    <Authorized>
+        @if (context.User.Identity == null)
+        {
+            <p>Identity is Null bruh</p> <br />
+        }
+        Name: @context.User.Claims.SingleOrDefault(claim => claim.Type == "name")?.Value <br />
+        IsAuthenticated: @context.User.Identity?.IsAuthenticated <br />
+        AuthenticationType: @context.User.Identity?.AuthenticationType <br />
+        @foreach (var claim in context.User.Claims)
+        {
+            <div class="row">
+                @claim.Type
+                @claim.Value
+            </div>
+            <br />
+        }
+    </Authorized>
+    <NotAuthorized>
+        <p>If log in then this page will show user information.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+}

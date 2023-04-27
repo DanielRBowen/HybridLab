@@ -1,0 +1,48 @@
+﻿
+<BSModal Size="Size" IsStaticBackdrop="true" IsFullScreen="@false" @ref="_modal">
+    <Header>@Title</Header>
+    <Content>@Message</Content>
+    <Footer Context="modal">
+        <BSButton Class="CancelClass" MarginStart="Margins.Auto" Color="BSColor.Secondary" @onclick="async() => await GiveResponse(false)">@CancelLabel</BSButton>
+        <BSButton Class="ConfirmClass" Color="BSColor.Primary" @onclick="async() => await GiveResponse(true)">@ConfirmLabel</BSButton>
+    </Footer>
+</BSModal>
+
+@code {
+    private BSModal _modal;
+
+    [Parameter]
+    public EventCallback<bool> Callback { get; set; }
+
+    [Parameter]
+    public MarkupString ConfirmLabel { get; set; } = new MarkupString("Ok");
+
+    [Parameter]
+    public string ConfirmClass { get; set; } = "";
+
+    [Parameter]
+    public MarkupString CancelLabel { get; set; } = new MarkupString("Cancel");
+
+    [Parameter]
+    public string CancelClass { get; set; } = "";
+
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public string Message { get; set; } = "";
+
+    [Parameter]
+    public Size Size { get; set; } = Size.Large;
+
+    public async Task OpenAsync()
+    {
+        await _modal.ShowAsync();
+    }
+
+    private async Task GiveResponse(bool response)
+    {
+        await Callback.InvokeAsync(response);
+        await _modal.HideAsync();
+    }
+}

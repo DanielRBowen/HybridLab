@@ -1,0 +1,47 @@
+﻿.step-container {
+    position: relative;
+}
+
+    .step-container > div {
+        position: absolute;
+        width: 100%;
+    }
+
+        .step-container > div:nth-child(2) {
+            animation: slide-left 0.5s forwards;
+        }
+
+        .step-container > div:nth-last-child(2) {
+            animation: slide-right 0.5s forwards;
+        }
+
+@keyframes slide-left {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slide-right {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.center-boarder {
+    text-align: center;
+    margin: 30px;
+}
+
+.inner-center {
+    margin: 0 auto;
+    height: 10rem;
+    width: 10rem;
+}
