@@ -4,7 +4,16 @@
 
 <p role="status">Current count: @currentCount</p>
 
+<h3>TimePicker Example</h3>
+
+<GoodTimePicker StartTime="7:00 AM" EndTime="6:00 PM" @bind-Value="@selectedTime" @bind-SelectedTimeSpan="@selectedTimeSpan" />
+
+<p>Selected Time: @selectedTime</p>
+<p>Selected TimeSpan: @selectedTimeSpan.ToString()</p>
+
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+<iframe src="TheNecessityofAtheism.pdf" class="my-5" style="width: 80vw; height: 80vh;"></iframe>
 
 @code {
     private int currentCount = 0;
@@ -13,4 +22,7 @@
     {
         currentCount++;
     }
+
+    private string selectedTime = "8:00 AM";
+    private TimeSpan selectedTimeSpan;
 }

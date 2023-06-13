@@ -72,7 +72,7 @@ namespace HybridLab.Core
         {
             string json = JsonConvert.SerializeObject(_dictionary);
 
-            if (File.Exists(_filePath) == false) 
+            if (File.Exists(_filePath) == false)
             {
                 lock (_lock)
                 {
@@ -81,13 +81,13 @@ namespace HybridLab.Core
                 }
             }
 
-            while (IsFileLocked(new FileInfo(_filePath)))
-            {
-                await Task.Delay(200);
-            }
-
             lock (_lock)
             {
+                while (IsFileLocked(new FileInfo(_filePath)))
+                {
+                    Task.Delay(200);
+                }
+
                 File.WriteAllText(_filePath, json);
             }
         }
