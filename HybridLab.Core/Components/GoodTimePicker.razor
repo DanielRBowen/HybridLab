@@ -1,0 +1,239 @@
+﻿@using System
+@using System.Collections.Generic
+
+<select @bind="@selectedTime" class="form-control">
+    @foreach (var time in times)
+    {
+        <option value="@time">@time</option>
+    }
+</select>
+
+@code {
+    [Parameter]
+    public string Value { get; set; }
+
+    [Parameter]
+    public string StartTime { get; set; }
+
+    [Parameter]
+    public string EndTime { get; set; }
+
+    [Parameter]
+    public TimeSpan SelectedTimeSpan { get; set; }
+
+    [Parameter]
+    public EventCallback<TimeSpan> SelectedTimeSpanChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private string _selectedTime = "00:00 AM";
+    private string selectedTime
+    {
+        get
+        {
+            return _selectedTime;
+        }
+        set
+        {
+            if (value != _selectedTime)
+            {
+                _selectedTime = value;
+                HandleSelectedTimeChange();
+            }
+        }
+    }
+
+    private bool isSelecting = false;
+    private List<string> times = new List<string>();
+
+    protected override void OnInitialized()
+    {
+        CreateTimes(StartTime, EndTime);
+
+        if (!string.IsNullOrEmpty(Value))
+        {
+            SelectedTimeSpan = ParseValueToTimeSpan(Value);
+            selectedTime = To12HourTime(SelectedTimeSpan);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+    }
+
+    private void ToggleSelection()
+    {
+        isSelecting = !isSelecting;
+    }
+
+    private void CreateTimes(string startTime, string endTime)
+    {
+        times.Clear();
+
+        int startHour = startTime != null ? ParseValueToTimeSpan(startTime).Hours : 0;
+        int endHour = endTime != null ? ParseValueToTimeSpan(endTime).Hours : 23;
+
+        for (int hour = startHour; hour <= endHour; hour++)
+        {
+            AppendToTimeSelect(hour, startHour, endHour);
+        }
+
+        SetSelectedTimeToStartTime();
+    }
+
+    private void AppendToTimeSelect(int hour, int startHour, int endHour)
+    {
+        var minutesSelection = new List<int> { 0, 15, 30, 45 };
+
+        if (hour == startHour && startHour != endHour)
+        {
+            int startMinutes = ParseValueToTimeSpan(StartTime).Minutes;
+            switch (startMinutes)
+            {
+                case 15:
+                    minutesSelection = new List<int> { 15, 30, 45 };
+                    break;
+                case 30:
+                    minutesSelection = new List<int> { 30, 45 };
+                    break;
+                case 45:
+                    minutesSelection = new List<int> { 45 };
+                    break;
+            }
+        }
+
+        if (hour == endHour && EndTime != null)
+        {
+            int endMinutes = ParseValueToTimeSpan(EndTime).Minutes;
+            minutesSelection = minutesSelection.Where(minutes => minutes <= endMinutes).ToList();
+        }
+
+        foreach (var minutes in minutesSelection)
+        {
+            string time = To12HourTime(new TimeSpan(hour, minutes, 0));
+            times.Add(time);
+        }
+    }
+
+    private string To12HourTime(TimeSpan timeSpan)
+    {
+        int hours = timeSpan.Hours;
+        int minutes = timeSpan.Minutes;
+        string amPm = hours < 12 ? "AM" : "PM";
+
+        if (hours > 12)
+        {
+            hours -= 12;
+        }
+        else if (hours == 0)
+        {
+            hours = 12;
+        }
+
+        string minutesString = minutes < 10 ? $"0{minutes}" : minutes.ToString();
+
+        return $"{hours}:{minutesString} {amPm}";
+    }
+
+    private TimeSpan ParseValueToTimeSpan(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            value = "12:00 AM";
+        }
+
+        string[] split = value.Split(':');
+        int hours = int.Parse(split[0]);
+        int minutes = int.Parse(split[1].Substring(0, 2));
+        string amPm = split[1].Substring(3, 2);
+
+        if (hours == 12 && amPm == "AM")
+        {
+            hours = 0;
+        }
+        else if (hours < 12 && amPm == "PM")
+        {
+            hours += 12;
+        }
+
+        return new TimeSpan(hours, minutes, 0);
+    }
+
+    private void SetSelectedTimeToStartTime()
+    {
+        selectedTime = StartTime;
+    }
+
+    private void SetSelectedTimeToNearestMinuteSelection()
+    {
+        if (string.IsNullOrEmpty(selectedTime))
+        {
+            return;
+        }
+
+        string[] split = selectedTime.Split(':');
+        int hours = int.Parse(split[0]);
+        int minutes = int.Parse(split[1].Substring(0, 2));
+        string amPm = split[1].Substring(3, 2);
+
+        if (minutes <= 0)
+        {
+            minutes = 0;
+        }
+        else if (minutes <= 15)
+        {
+            minutes = 15;
+        }
+        else if (minutes <= 30)
+        {
+            minutes = 30;
+        }
+        else if (minutes <= 45)
+        {
+            minutes = 45;
+        }
+        else if (minutes > 45)
+        {
+            minutes = 0;
+            hours += 1;
+        }
+
+        string newMinutesString = minutes < 10 ? $"0{minutes}" : minutes.ToString();
+
+        selectedTime = $"{hours}:{newMinutesString} {amPm}";
+    }
+
+    private void HandleSelectedTimeChange()
+    {
+        if (string.IsNullOrEmpty(selectedTime))
+        {
+            selectedTime = times[0];
+        }
+
+        SetSelectedTimeToNearestMinuteSelection();
+
+        if (!times.Contains(selectedTime))
+        {
+            selectedTime = times[0];
+        }
+
+        SelectedTimeSpan = ParseValueToTimeSpan(selectedTime);
+        Value = selectedTime;
+
+        SelectedTimeSpanChanged.InvokeAsync(SelectedTimeSpan);
+        ValueChanged.InvokeAsync(Value);
+    }
+
+    private void HandleStartTimeChange()
+    {
+        CreateTimes(StartTime, EndTime);
+
+        if (!string.IsNullOrEmpty(Value))
+        {
+            SelectedTimeSpan = ParseValueToTimeSpan(Value);
+            selectedTime = To12HourTime(SelectedTimeSpan);
+        }
+    }
+}

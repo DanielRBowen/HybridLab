@@ -26,5 +26,13 @@
             if (obj != null)
                 action();
         }
+
+        public static async Task<bool> WaitForNonNullAsync(object obj, TimeSpan? period = null, Action action = null)
+        {
+            var interval = period ?? TimeSpan.FromMilliseconds(300);
+            action?.Invoke();
+            await Task.Delay(interval);
+            return obj != null;
+        }
     }
 }
